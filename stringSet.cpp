@@ -13,7 +13,7 @@ int hashs(string s, int table_size)
 {
 	unsigned int i, h = 0;
 	for (i = 0; i<s.length(); i++)
-		h = (h * 2917 + (unsigned int)s[i]) % table_size;
+		h = (h * 2917291729172917 + (unsigned int)s[i]) % table_size;
 	return h;
 }
 
@@ -95,14 +95,14 @@ void Stringset::print(void)
 	for (int i = 0; i < size; i++) {
 		Node* temp = webPages[i];
 		if (temp) {
-			std::cout << temp->key << std::endl;
+			std::cout << temp->key << (webPages[i]->weight) << std::endl;
 			while (temp->next) {
 				temp = temp->next;
-				std::cout << temp->key << temp->weight << std::endl;
+				std::cout << temp->key << std::endl;
 			}
 		}
 	} //end for
-
+	/*
 	//print words
 	for (int i = 0; i < size; i++) {
 		Node* temp = table[i];
@@ -114,15 +114,19 @@ void Stringset::print(void)
 			}
 		}
 	} //end for
+	*/
+
 }//end function
 
 void Stringset::readFile() {
 
+	wordCount = 0;
 	string http = "four"; //allocate a temp string size 4
 	ifstream in;
 	string s;
 
-	in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt");
+	//in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt"); //PC
+	in.open("C:/Users/ty/Desktop/labs/proj1/fakewebpages.txt"); //laptop
 
 	if (!in) {
 		std::cout << "file not opened\n";
@@ -135,10 +139,13 @@ void Stringset::readFile() {
 			size++;
 	}
 	in.close();
+
 	table = allocate_table(size);
 	webPages = allocate_table(size);
 
-	in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt");
+	//in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt"); //PC
+	in.open("C:/Users/ty/Desktop/labs/proj1/fakewebpages.txt"); //laptop
+
 	while (in) {
 		in >> s;
 		///READ ALL OF THE WEBPAGES IN
@@ -147,11 +154,13 @@ void Stringset::readFile() {
 			in >> s;
 			index = insertHead(s, webPages); //webpages
 			index = insertHead(s, table); //words
-			webPages[index]->weight = 1 / size; //all weights set to default
+			//webPages[index]->weight = 1 / size; //all weights set to default
 		}
 	}
 	in.close();
-	in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt");
+
+	//in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt"); //PC
+	in.open("C:/Users/ty/Desktop/labs/proj1/fakewebpages.txt"); //laptop
 
 	while (in) {
 		in >> s;
@@ -174,14 +183,18 @@ void Stringset::readFile() {
 						if (webPages[hashs(s, size)]->key == s) insert(s, index, webPages);
 						else in.ignore();
 					}
-					else
+					else {
 						//insert an h word that's not http
 						insert(s, index, table);
+						++wordCount;
+					}
 				}
-				else
+				else {
 					//insert word, if not already in word array
 					if (!find(s))
 						insert(s, index, table);
+						++wordCount;
+				}
 			}
 
 
@@ -192,25 +205,44 @@ void Stringset::readFile() {
 
 	}
 	in.close();
+	iIndex = allocate_table(wordCount);
 }
 
 void Stringset::pageRank() {
 
+	for (int k = 0; k < size; k++) { //set defaults
+		webPages[k]->weight = (1.0 / size);
+	}
+
 	//do this 50 times
 	for (int u = 0; u < 50; u++) {
+		int t = 0;//keep count of linked web pages
 		//loop thru each webpage
 		for (int i = 0; i < size; i++) {
-			webPages[i]->new_weight = 0.1 / size;
+			webPages[i]->new_weight = (0.1 / size);
 			//for each link on the [i] webpage
-			int t = 0; //keep count of linked web pages
 			for (Node* temp = webPages[i]; temp != NULL; temp = temp->next) {
-				++t;
-				temp->new_weight *= (0.9 * temp->weight / t);
+				t++; //get total links on page
+			}
+			for (Node* temptwo = webPages[i]->next; temptwo != NULL; temptwo = temptwo->next) {
+				int index = hashs(temptwo->key, size);
+				webPages[index]->new_weight += (0.9 * webPages[index]->weight / t); //add the new weight for each link on the list
 			}
 		webPages[i]->weight = webPages[i]->new_weight;
 		}
 	}
 	
 
+
+}
+
+void Stringset::invertedIndex() {
+
+	for (int i = 0; i < size; i++) {
+		string k = table[i]->next->key;
+		int index = insertHead(k, iIndex);
+		//head is inserted
+
+	}
 
 }

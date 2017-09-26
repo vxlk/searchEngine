@@ -12,8 +12,8 @@ struct Node {
 	Node(string k, Node *n) { key = k; next = n; count = 1; }
 	Node() { key = ""; next = NULL; count = 0; }
 	int count;
-	int weight;
-	int new_weight;
+	double weight;
+	double new_weight;
 };
 
 
@@ -25,8 +25,10 @@ private:
 
 	Node **table;  // array of words
 	Node **webPages; //array of webpages
+	Node **iIndex; //array of words with pointers to links
 	int size;      // size of table, as currently allocated
 	int num_elems; // number of elements stored in the table
+	int wordCount;
 
 public:
 
@@ -40,6 +42,7 @@ public:
 	void print(void);
 	int& operator[](string key);
 	void pageRank();
+	void invertedIndex();
 };
 
 
