@@ -13,8 +13,12 @@ int hashs(string s, int table_size)
 {
 	unsigned int i, h = 0;
 	for (i = 0; i<s.length(); i++)
-		h = (h * 2917291729172917 + (unsigned int)s[i]) % table_size;
+		h = (h * 2917 + (unsigned int)s[i]) % table_size;
 	return h;
+}
+
+void allocateIDStruct(idStruct*& table){
+	table = new idStruct;
 }
 
 /* Allocate a table of pointers to nodes, all initialized to NULL */
@@ -85,7 +89,7 @@ void Stringset::insert(string key, int position, Node**& table) {
 /* Inserts a new ID.  It is an error if key is already in the set. */
 void Stringset::insertID(int id, idStruct* table) {
 
-	if (table->index == -1) { //meaning it has not been initialized...
+	if (!table) { //meaning it has not been initialized...
 		table = new idStruct(id, table); //make head
 		return;
 	}
@@ -159,6 +163,7 @@ void Stringset::readFile() {
 		std::cout << "file not opened\n";
 	}
 
+	cout << "\ngetting size...\n";
 	//get the size of the array
 	while (in) {
 		in >> s;
@@ -170,6 +175,7 @@ void Stringset::readFile() {
 	table = allocate_table(size);
 	webPages = allocate_table(size);
 
+	cout << "\nwebPages and Table...";
 	in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt"); //PC
 	//in.open("C:/Users/ty/Desktop/labs/proj1/fakewebpages.txt"); //laptop
 
@@ -189,6 +195,8 @@ void Stringset::readFile() {
 	in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt"); //PC
 	//in.open("C:/Users/ty/Desktop/labs/proj1/fakewebpages.txt"); //laptop
 
+	cout << "\nreading words...\n";
+
 	while (in) {
 		in >> s;
 
@@ -202,13 +210,17 @@ void Stringset::readFile() {
 
 				//if https is read in w.o a new page then ignore it
 				if (s[0] == 'h') {
-					for (int i = 0; i < 4; i++)
-						http[i] = s[i];
-
+					for (int i = 0; i < 4; i++) {
+						if (s[i])
+							http[i] = s[i];
+						else break;
+					}
 					if (http == "http") {
 						//if it hashes to a key in the index
-						if (webPages[hashs(s, size)]->key == s) insert(s, index, webPages);
-						else in.ignore();
+						if (webPages[hashs(s, size)]) {
+							if (webPages[hashs(s, size)]->key == s) insert(s, index, webPages);
+							else in.ignore();
+						}
 					}
 					else {
 						//insert an h word that's not http
@@ -274,6 +286,8 @@ void Stringset::invertedIndex() {
 			while (temp->next) {
 				temp = temp->next;
 				int index = insertWord(temp->key, iIndex, wordCount);
+				if (!iIndex[index]->id)
+					allocateIDStruct(iIndex[index]->id);
 				insertID(idStorage, iIndex[index]->id);
 			
 			}
@@ -290,15 +304,19 @@ void Stringset::invertedIndex() {
 			cout << "\nEnter a word to be found\n";
 			cin >> s;
 			int b = hashs(s, wordCount); //hash to find the word in word table
-			idStruct* traverse = iIndex[b]->id;
-			while (traverse) { //find all the urls associated with that word
-				//check id
-				//int lookup = iIndex[b]->id[x];
-				s = table[traverse->index]->key; //you now have the webpage
-				cout << s << "\n";
-				traverse = traverse->next;
-				++x;
+			if (iIndex[b]) {
+				idStruct* traverse = iIndex[b]->id->next;
+				while (traverse) { //find all the urls associated with that word
+					//check id
+					//int lookup = iIndex[b]->id[x];
+					s = table[traverse->index]->key; //you now have the webpage
+					index = hashs(s, size);
+					cout << webPages[index]->weight << " " << s << "\n";
+					traverse = traverse->next;
+					++x;
+				}
 			}
+			else cout << "\n not in structure\n";
 		}
 
 }

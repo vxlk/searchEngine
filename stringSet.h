@@ -10,14 +10,14 @@ struct idStruct {
 	int index;
 	idStruct *next;
 	idStruct(int ind, idStruct *n) { index = ind; next = n; }
-	idStruct() { index = -1; next = NULL; }
+	idStruct() { index = 0; next = NULL; }
 };
 
 struct Node {
 	string key;
 	Node *next;
-	Node(string k, Node *n) { key = k; next = n; count = 1; }
-	Node() { key = ""; next = NULL; count = 0; }
+	Node(string k, Node *n) { key = k; next = n; count = 1; id = NULL; }
+	Node() { key = ""; next = NULL; count = 0; id = NULL; }
 	int count;
 	double weight;
 	double new_weight;
