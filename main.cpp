@@ -8,6 +8,7 @@ int main(void) {
 	stringset.readFile();
 	stringset.pageRank();
 	stringset.print();
+	stringset.invertedIndex();
 	int v;
 	std::cin >> v;
 

@@ -82,8 +82,35 @@ void Stringset::insert(string key, int position, Node**& table) {
 	}
 }
 
+/* Inserts a new ID.  It is an error if key is already in the set. */
+void Stringset::insertID(int id, idStruct* table) {
+
+	if (table->index == -1) { //meaning it has not been initialized...
+		table = new idStruct(id, table); //make head
+		return;
+	}
+
+	else {
+		idStruct *temp = table;
+		while (temp) {
+			if (temp->next == NULL) {
+				temp->next = new idStruct(id, temp->next); //add at the end
+				break;
+			}
+			temp = temp->next;
+		}
+	}
+}
+
 /* Inserts a new key.  It is an error if key is already in the set. */
 int Stringset::insertHead(string key, Node**& table)
+{
+	table[hashs(key, size)] = new Node(key, table[hashs(key, size)]);
+	return hashs(key, size);
+}
+
+/* Inserts a new word.  It is an error if key is already in the set. */
+int Stringset::insertWord(string key, Node**& table, int size)
 {
 	table[hashs(key, size)] = new Node(key, table[hashs(key, size)]);
 	return hashs(key, size);
@@ -125,8 +152,8 @@ void Stringset::readFile() {
 	ifstream in;
 	string s;
 
-	//in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt"); //PC
-	in.open("C:/Users/ty/Desktop/labs/proj1/fakewebpages.txt"); //laptop
+	in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt"); //PC
+	//in.open("C:/Users/ty/Desktop/labs/proj1/fakewebpages.txt"); //laptop
 
 	if (!in) {
 		std::cout << "file not opened\n";
@@ -143,8 +170,8 @@ void Stringset::readFile() {
 	table = allocate_table(size);
 	webPages = allocate_table(size);
 
-	//in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt"); //PC
-	in.open("C:/Users/ty/Desktop/labs/proj1/fakewebpages.txt"); //laptop
+	in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt"); //PC
+	//in.open("C:/Users/ty/Desktop/labs/proj1/fakewebpages.txt"); //laptop
 
 	while (in) {
 		in >> s;
@@ -159,8 +186,8 @@ void Stringset::readFile() {
 	}
 	in.close();
 
-	//in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt"); //PC
-	in.open("C:/Users/ty/Desktop/labs/proj1/fakewebpages.txt"); //laptop
+	in.open("C:/Users/Ty/Desktop/proj1/fakewebpages.txt"); //PC
+	//in.open("C:/Users/ty/Desktop/labs/proj1/fakewebpages.txt"); //laptop
 
 	while (in) {
 		in >> s;
@@ -191,7 +218,7 @@ void Stringset::readFile() {
 				}
 				else {
 					//insert word, if not already in word array
-					if (!find(s))
+					//if (!find(s))
 						insert(s, index, table);
 						++wordCount;
 				}
@@ -238,11 +265,40 @@ void Stringset::pageRank() {
 
 void Stringset::invertedIndex() {
 
+	//read into word array
 	for (int i = 0; i < size; i++) {
-		string k = table[i]->next->key;
-		int index = insertHead(k, iIndex);
-		//head is inserted
+		Node* temp = table[i];
+		if (temp) {
+			//get the id of the url the words belong to
+			int idStorage = hashs(temp->key, size);
+			while (temp->next) {
+				temp = temp->next;
+				int index = insertWord(temp->key, iIndex, wordCount);
+				insertID(idStorage, iIndex[index]->id);
+			
+			}
+		}
+	} //end for
+	
+	//now add the urls if the word appears on their page, back to table
+	//the word's id the hashed index of the webpage it belongs to
+	
+		int x = 0;
+		string s;
 
-	}
+		while (s != "quit") {
+			cout << "\nEnter a word to be found\n";
+			cin >> s;
+			int b = hashs(s, wordCount); //hash to find the word in word table
+			idStruct* traverse = iIndex[b]->id;
+			while (traverse) { //find all the urls associated with that word
+				//check id
+				//int lookup = iIndex[b]->id[x];
+				s = table[traverse->index]->key; //you now have the webpage
+				cout << s << "\n";
+				traverse = traverse->next;
+				++x;
+			}
+		}
 
 }

@@ -6,6 +6,13 @@
 #include <string>
 using namespace std;
 
+struct idStruct {
+	int index;
+	idStruct *next;
+	idStruct(int ind, idStruct *n) { index = ind; next = n; }
+	idStruct() { index = -1; next = NULL; }
+};
+
 struct Node {
 	string key;
 	Node *next;
@@ -14,6 +21,7 @@ struct Node {
 	int count;
 	double weight;
 	double new_weight;
+	idStruct *id;
 };
 
 
@@ -39,10 +47,13 @@ public:
 	bool find(string key);
 	void insert(string key, int, Node**&);
 	int insertHead(string key, Node**&);
+	int insertWord(string key, Node**&, int size);
 	void print(void);
 	int& operator[](string key);
 	void pageRank();
 	void invertedIndex();
+	void insertID(int id, idStruct*);
+
 };
 
 
